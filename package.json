@@ -1,0 +1,40 @@
+{
+  "name": "decompile-handlebars",
+  "version": "0.0.0",
+  "author": {
+    "name": "FakeApate",
+    "email": "imbos@pm.me"
+  },
+  "main": "src/index.ts",
+  "packageManager": "yarn@4.3.1",
+  "type": "module",
+  "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "@types/node": "^22.13.11",
+    "@typescript-eslint/parser": "^8.27.0",
+    "eslint": "^9.23.0",
+    "eslint-config-prettier": "^10.1.1",
+    "globals": "^16.0.0",
+    "jiti": "^2.4.2",
+    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
+    "ts-api-utils": "^2.1.0",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.27.0"
+  },
+  "scripts": {
+    "start": "node build/src/index.js",
+    "clean": "rimraf coverage build tmp",
+    "prebuild": "yarn run lint",
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -w -p tsconfig.json",
+    "build:release": "yar run clean && tsc -p tsconfig.release.json",
+    "lint": "eslint .",
+    "prettier": "prettier \"{src,__{tests}__}/**/*.{ts,mts}\" --config .prettierrc --write",
+    "prettier:check": "prettier \"{src,__{tests}__}/**/*.{ts,mts}\" --config .prettierrc --check"
+  },
+  "dependencies": {
+    "acorn": "^8.14.1",
+    "acorn-walk": "^8.3.4"
+  }
+}
