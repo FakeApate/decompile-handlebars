@@ -5,6 +5,7 @@
     "name": "FakeApate",
     "email": "imbos@pm.me"
   },
+  "readme": "README.md",
   "license": "MIT",
   "main": "src/index.ts",
   "packageManager": "yarn@4.3.1",
