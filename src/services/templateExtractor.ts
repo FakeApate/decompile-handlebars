@@ -2,10 +2,7 @@ import {
   Program,
   AnyNode,
   Literal,
-  MemberExpression,
   PrivateIdentifier,
-  FunctionDeclaration,
-  ReturnStatement,
   ObjectExpression,
   Property,
   Identifier,
@@ -13,7 +10,7 @@ import {
   Expression,
   FunctionExpression,
 } from "acorn";
-import { OptionTypes, ProgramMapType } from "../types/index.js";
+import { ProgramMapType } from "../types/index.js";
 import * as walk from "acorn-walk";
 import { NodeProcessorFactory } from "./index.js";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
@@ -24,121 +21,7 @@ import { existsSync, mkdirSync, writeFileSync } from "fs";
 export default class TemplateExtractor {
   constructor(private ast: Program) {}
 
-  // Compare keys helper (unchanged from original)
-  static compareKeys(actual: string[], expected: string[]): boolean {
-    return (
-      actual.length === expected.length &&
-      actual.every((key, index) => key === expected[index])
-    );
-  }
-
-  // Determine option type based on object keys
-  static getOptionType(options: { [key: string]: string }): OptionTypes {
-    const keys = Object.keys(options);
-    if (TemplateExtractor.compareKeys(keys, ["name", "hash", "data", "loc"])) {
-      return OptionTypes.SimpleOptions;
-    } else if (
-      TemplateExtractor.compareKeys(keys, [
-        "name",
-        "hash",
-        "fn",
-        "inverse",
-        "data",
-        "loc",
-      ])
-    ) {
-      return OptionTypes.BlockOptions;
-    } else if (
-      TemplateExtractor.compareKeys(keys, [
-        "name",
-        "hash",
-        "data",
-        "helpers",
-        "partials",
-        "decorators",
-      ])
-    ) {
-      return OptionTypes.TemplateRuntimeOptions;
-    }
-    throw new Error("Not a valid type");
-  }
-
-  // Process options properties
-  static processOptions(
-    optionsNode: ObjectExpression,
-    programMap: ProgramMapType,
-  ): { [key: string]: string } {
-    const result: { [key: string]: string } = {};
-    optionsNode.properties.forEach((prop: Property) => {
-      const key = (prop.key as Identifier).name;
-      result[key] = TemplateExtractor.optionConverter(
-        key,
-        prop.value,
-        programMap,
-      );
-    });
-    return result;
-  }
-
-  // Process block of object expressions to generate template string
-  // TODO Move logic to indiviual processors
-  static processBlock(
-    nodes: AnyNode[],
-    varName: string | null,
-    programMap: ProgramMapType,
-  ): string {
-    if (nodes.length === 0) return "";
-    if (nodes.length === 1 && nodes[0].type === "Literal")
-      return nodes[0].value as string;
-    const res = nodes.filter(
-      (n: ObjectExpression) =>
-        n.properties?.length >= 4 &&
-        ((n.properties[0] as Property).key as Identifier).name === "name",
-    ) as ObjectExpression[];
-    if (res.length !== 1) {
-      throw new Error("Didn't find or found too many nodes");
-    }
-    res[0].properties.forEach((p) => {
-      if (p.type !== "Property")
-        throw new Error("Property type is not Property");
-    });
-    const options = TemplateExtractor.processOptions(res[0], programMap);
-    const optionType = TemplateExtractor.getOptionType(options);
-    let extra = "";
-    switch (optionType) {
-      case OptionTypes.BlockOptions:
-        // Extend block options processing here as needed.
-        break;
-      case OptionTypes.SimpleOptions:
-        if (options.hash) {
-          throw new Error("Hash detected in Simple Options");
-        }
-        if (varName) {
-          extra = ` "${varName}"`;
-        }
-        return `{{${options.name}${extra}}}`;
-      case OptionTypes.TemplateRuntimeOptions:
-        if (options.hash) {
-          extra = ` ${options.hash}`;
-        }
-        return `{{> ${options.name}${extra}}}`;
-      default:
-        throw new Error("Invalid OptionType");
-    }
-    return "";
-  }
-
   // Process arguments into a string (unchanged from original)
-  static processArguments(options: ObjectExpression): string {
-    if (options.properties.length === 0) return "";
-    const result: string[] = [];
-    options.properties.forEach((prop: Property) => {
-      const key = (prop.key as Identifier).name;
-      const value = (prop.value as Literal).value;
-      result.push(`${key}="${value}"`);
-    });
-    return result.join(" ");
-  }
 
   // Flatten a binary expression into its component nodes.
   static flattenBinaryExpression(
@@ -169,52 +52,6 @@ export default class TemplateExtractor {
       },
     });
     return objects;
-  }
-
-  // Convert an option by its name.
-  static optionConverter(
-    name: string,
-    node: AnyNode,
-    programMap: ProgramMapType,
-  ): string {
-    switch (name) {
-      case "name":
-        return (node as Literal).value as string;
-      case "hash":
-        return TemplateExtractor.processArguments(node as ObjectExpression);
-      case "loc":
-      case "data":
-      case "helpers":
-      case "partials":
-      case "decorators":
-        return null;
-      case "inverse":
-      case "fn":
-        if (node.type === "MemberExpression") {
-          if (
-            ((node as MemberExpression).property as PrivateIdentifier).name ===
-            "noop"
-          ) {
-            return null;
-          }
-          throw new Error("Non-noop MemberExpression");
-        } else if (node.type === "CallExpression") {
-          const templateKey = (node.arguments[0] as Literal).value as number;
-          const partialBody = (programMap[templateKey] as FunctionDeclaration)
-            .body.body;
-          const retNode = partialBody[
-            partialBody.length - 1
-          ] as ReturnStatement;
-          return TemplateExtractor.processPartialNodeHandler(
-            retNode.argument as BinaryExpression,
-            programMap,
-          );
-        }
-        throw new Error("Unexpected type");
-      default:
-        console.log(name);
-        return null;
-    }
   }
 
   // Process a flat node handler by using our NodeProcessorFactory.

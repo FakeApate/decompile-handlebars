@@ -1,4 +1,4 @@
 import NodeProcessorFactory from "./nodeProcessorFactory.js";
 import TemplateExtractor from "./templateExtractor.js";
-
-export { NodeProcessorFactory, TemplateExtractor };
+import optionKeyConverter from "./optionKeyConverter.js";
+export { NodeProcessorFactory, TemplateExtractor, optionKeyConverter };

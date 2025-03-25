@@ -1,7 +1,10 @@
 import { AnyNode, CallExpression, Identifier } from "acorn";
 import {
+  AssignmentExpressionProcessor,
+  BinaryExpressionProcessor,
   CallExpressionProcessor,
   ConditionalExpressionProcessor,
+  IdentifierProcessor,
   LiteralProcessor,
   LogicalExpressionProcessor,
   NodeProcessor,
@@ -23,6 +26,12 @@ export default class NodeProcessorFactory {
         return new ConditionalExpressionProcessor(node, programMap, varName);
       case "LogicalExpression":
         return new LogicalExpressionProcessor(node, programMap, varName);
+      case "BinaryExpression":
+        return new BinaryExpressionProcessor(node, programMap, varName);
+      case "AssignmentExpression":
+        return new AssignmentExpressionProcessor(node, programMap, varName);
+      case "Identifier":
+        return new IdentifierProcessor(node, programMap, varName);
       default:
         throw new Error(`Unsupported node type: ${node.type}`);
     }

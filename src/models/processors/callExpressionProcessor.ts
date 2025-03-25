@@ -1,6 +1,7 @@
 import { AnyNode, CallExpression } from "acorn";
 import { NodeProcessorFactory, TemplateExtractor } from "../../services/index.js";
 import NodeProcessor from "./nodeProcessor.js";
+import OptionParserFactory from "../../services/optionsParserFactory.js";
 
 export default class CallExpressionProcessor extends NodeProcessor {
     process(): string | null {
@@ -21,6 +22,7 @@ export default class CallExpressionProcessor extends NodeProcessor {
       }
       // Collect object expressions and delegate to processBlock
       const objects = TemplateExtractor.collectObjectExpressions(this.node.arguments[0]);
-      return TemplateExtractor.processBlock(objects, this.varName, this.programMap);
+      const parser = OptionParserFactory.createParser(objects, this.programMap, this.varName)
+      return parser.process();
     }
   }

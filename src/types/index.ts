@@ -1,3 +1,3 @@
-import { OptionTypes } from "./optionTypes.js";
+import { OptionType, Options } from "./optionTypes.js";
 import { ProgramMapType } from "./programMapType.js";
-export {OptionTypes, ProgramMapType}
+export {OptionType, ProgramMapType, Options}
