@@ -4,7 +4,7 @@ import { parse } from "acorn";
 import { extractTemplateMap } from "./utils/map.js";
 import { TemplateExtractor } from "./services/index.js";
 
-const inputFile = "./test_data/360.4a5194a0af824ee0df1a.js";
+const inputFile = "./test_data/360.js";
 const source = readFileSync(inputFile, "utf-8");
 
 const ast = parse(source, {

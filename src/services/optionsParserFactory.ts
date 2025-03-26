@@ -93,6 +93,7 @@ export default class OptionParserFactory {
   static createParser(objects: (ObjectExpression | Literal)[], programMap: ProgramMapType, varName?: string): OptionParser {
     const options = processOptions(findOptionsObject(objects), programMap) 
     const type = getOptionType(options);
+    console.log(options["name"])
     switch (type) {
       case OptionType.BlockOptions:
         return new BlockParser(options);

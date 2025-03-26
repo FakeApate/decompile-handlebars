@@ -62,16 +62,12 @@ export default class TemplateExtractor {
     const nodes = TemplateExtractor.flattenBinaryExpression(expr);
     const parts: string[] = [];
     nodes.forEach((n) => {
-      try {
         const processor = NodeProcessorFactory.createProcessor(n, programMap);
         const res = processor.process();
         if (res === null) {
           console.log("null error");
         }
         parts.push(res);
-      } catch (error) {
-        console.error("Error processing node:", error);
-      }
     });
     return parts.join("");
   }

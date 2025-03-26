@@ -10,6 +10,7 @@ import {
   NodeProcessor,
 } from "../models/index.js";
 import { ProgramMapType } from "../types/index.js";
+import UnaryExpressionProcessor from "../models/processors/unaryExpressionProcessor.js";
 
 export default class NodeProcessorFactory {
   static createProcessor(
@@ -32,6 +33,8 @@ export default class NodeProcessorFactory {
         return new AssignmentExpressionProcessor(node, programMap, varName);
       case "Identifier":
         return new IdentifierProcessor(node, programMap, varName);
+      case "UnaryExpression":
+        return new UnaryExpressionProcessor(node, programMap, varName)
       default:
         throw new Error(`Unsupported node type: ${node.type}`);
     }
